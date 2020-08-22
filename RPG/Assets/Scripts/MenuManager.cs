@@ -13,6 +13,8 @@ public class MenuManager : MonoBehaviour
     public Image imgLoading;
     [Header("要載入的場景名稱")]
     public string nameScene = "遊戲場景";
+    [Header("提示")]
+    public GameObject tip;
 
     /// <summary>
     /// 離開遊戲
@@ -27,23 +29,32 @@ public class MenuManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
-         
+
     }
 
     private IEnumerator Loading()
     {
         panelLoading.SetActive(true);                                   // 顯示載入畫面
         AsyncOperation ao = SceneManager.LoadSceneAsync(nameScene);     // 異步載入場景(場景名稱)
-        ao.allowSceneActivation = false;
+        ao.allowSceneActivation = false;                                // 不要自動載入
 
-
+        // 當 場景尚未載入完成
         while (!ao.isDone)
         {
-            textLoading.text = ao.progress * 100 + "%";                 // 更新文字
-            imgLoading.fillAmount = ao.progress;                        // 更新進度條
-            yield return null;
+            // progres 值 0 = 0.9 需要 除以 0.9
+            // ToString("F數字") = F0 小數點後零位數 F2 兩位數
+            textLoading.text = (ao.progress / 0.9f * 100).ToString("F0") + "%";                 // 更新文字
+            imgLoading.fillAmount = ao.progress / 0.9f;                                         // 更新進度條
+            yield return null;                                                                  // 等待一個影格
+
+            if (ao.progress == 0.9f)                                                           // 如果 載入進度 等於 0.9
+            {
+                tip.SetActive(true);                                                            // 顯示提示文字
+
+                if (Input.anyKeyDown) ao.allowSceneActivation = true;
+            }
         }
     }
 
-    
+
 }
