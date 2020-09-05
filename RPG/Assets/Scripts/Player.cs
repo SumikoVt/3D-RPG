@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -16,11 +17,16 @@ public class Player : MonoBehaviour
     /// </summary>
     public bool stop;
 
-    [Header("傳送門")]
+    [Header("傳送門:0 NPC, 1 殭屍")]
     public Transform[] doors;
+    [Header("介面區塊")]
+    public Image barHp;
+    public Image barMp;
+    public Image barExp;
 
     private float attack = 10;
     private float hp = 100;
+    private float maxHp = 100;
     private float mp = 50;
     private float exp;
     private int lv = 1;
@@ -131,14 +137,22 @@ public class Player : MonoBehaviour
         aud.PlayOneShot(soundProp, 0.05f);
     }
 
-    private void Hit()
+    public void Hit(float damage, Transform direction)
     {
+        hp -= damage;
+        ani.SetTrigger("受傷觸發");
+        rig.AddForce(direction.forward * 100 + direction.up * 150);     // 擊退朝怪物前方與上方
 
+        hp = Mathf.Clamp(hp, 0, 99999);                                 // 夾住血量不低於 0
+        barHp.fillAmount = hp / maxHp;                                  // 更新血條
+
+        if (hp == 0) Dead();                                            // 如果血量等於 0 就死亡
     }
 
     private void Dead()
     {
-
+        ani.SetBool("死亡開關", true);      // 死亡動畫
+        enabled = false;                    // 關閉此腳本
     }
 
     private void Exp()
