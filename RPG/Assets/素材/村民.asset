@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "\u6751\u6C11"
   m_EditorClassIdentifier: 
   _NPCState: 1
-  count: 5
+  count: 20
   dialogs:
   - "\u55E8, \u6C92\u898B\u904E\u7684\u9762\u5B54\u5462,\u5E6B\u6211\u6536\u96C620\u500B\u9AB7\u9ACF\u5427!
     \u65B0\u4F86\u7684\u7E3D\u8981\u591A\u505A\u9EDE\u4E8B\u624D\u884C!"
