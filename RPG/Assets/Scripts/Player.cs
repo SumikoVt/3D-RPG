@@ -23,11 +23,17 @@ public class Player : MonoBehaviour
     public Image barHp;
     public Image barMp;
     public Image barExp;
+    [Header("流星雨")]
+    public Transform stone;
 
-    private float attack = 10;
+    [HideInInspector]
+    public float stoneDamage = 200;
+    public float stoneCost = 10;
+    private float attack = 30;
     private float hp = 100;
     private float maxHp = 100;
     private float mp = 50;
+    private float maxMp = 50;
     private float exp;
     private int lv = 1;
 
@@ -49,6 +55,12 @@ public class Player : MonoBehaviour
         cam = GameObject.Find("攝影機根物件").transform;
 
         npc = FindObjectOfType<NPC>();
+    }
+
+    private void Update()
+    {
+        Attack();
+        Skill();
     }
 
     private void FixedUpdate()
@@ -75,6 +87,12 @@ public class Player : MonoBehaviour
             transform.position = doors[0].position;                        // 傳送到 NPC
             doors[0].GetComponent<CapsuleCollider>().enabled = false;      // 關閉 NPC 傳送門碰撞
             Invoke("OpendoorNPC", 3);
+        }
+
+        // 如果 碰到物件的標籤 等於 殭屍
+        if (other.tag == "殭屍")
+        {
+            other.GetComponent<Enemy>().Hit(attack, transform);
         }
     }
     #endregion
@@ -116,14 +134,32 @@ public class Player : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 攻擊
+    /// </summary>
     private void Attack()
     {
-
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            ani.SetTrigger("攻擊觸發");
+        }
     }
 
+    /// <summary>
+    /// 流星雨
+    /// </summary>
     private void Skill()
     {
-
+        if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            if (stoneCost <= mp)
+            {
+                mp -= stoneCost;
+                barMp.fillAmount = mp / maxMp;
+                Vector3 pos = transform.forward * 4 + transform.up * 3.5f;
+                Instantiate(stone, transform.position + pos, transform.rotation);
+            }
+        }
     }
 
     /// <summary>
@@ -136,7 +172,11 @@ public class Player : MonoBehaviour
         npc.UpdateTextMission();
         aud.PlayOneShot(soundProp, 0.05f);
     }
-
+    /// <summary>
+    /// 受傷:動畫,扣血與擊退
+    /// </summary>
+    /// <param name="damage"></param>
+    /// <param name="direction"></param>
     public void Hit(float damage, Transform direction)
     {
         hp -= damage;
@@ -149,6 +189,9 @@ public class Player : MonoBehaviour
         if (hp == 0) Dead();                                            // 如果血量等於 0 就死亡
     }
 
+    /// <summary>
+    /// 死亡
+    /// </summary>
     private void Dead()
     {
         ani.SetBool("死亡開關", true);      // 死亡動畫

@@ -17,16 +17,23 @@ public class Enemy : MonoBehaviour
     public float cd = 2.5f;
     [Header("面向玩家速度"), Range(0.1f, 50f)]
     public float turn = 5f;
+    [Header("骷髏頭")]
+    public Transform skull;
+    [Header("掉落機率:0.3 代表30%")]
+    public float skullprop = 0.3f;
 
     private NavMeshAgent nav;     // 導覽代理器
     private Animator ani;         // 動畫控制器
     private Transform player;     // 玩家
     private float timer;          // 計時器
 
+    private Rigidbody rig;
+
     private void Awake()
     {
         ani = GetComponent<Animator>();              // 取得動畫控制器  
         nav = GetComponent<NavMeshAgent>();          // 取得導覽代理器
+        rig = GetComponent<Rigidbody>();
         nav.speed = speed;                           // 設定速度
         nav.stoppingDistance = distanceAttack;       // 設定攻擊停止距離
 
@@ -54,6 +61,14 @@ public class Enemy : MonoBehaviour
         Gizmos.DrawSphere(transform.position, distanceAttack);
     }
 
+    private void OnParticleCollision(GameObject other)
+    {
+        if (other.name == "碎石")
+        {
+            Hit(player.GetComponent<Player>().stoneDamage, player.transform);
+        }
+    }
+
     private void Move()
     {
         nav.SetDestination(player.position);           // 追蹤玩家的座標 
@@ -77,5 +92,35 @@ public class Enemy : MonoBehaviour
             timer = 0;                      // 計時器歸零
             ani.SetTrigger("攻擊觸發");     // 攻擊
         }
+    }
+
+    /// <summary>
+    /// 受傷:動畫,扣血與擊退
+    /// </summary>
+    /// <param name="damage"></param>
+    /// <param name="direction"></param>
+    public void Hit(float damage, Transform direction)
+    {
+        hp -= damage;
+        ani.SetTrigger("受傷觸發");
+        rig.AddForce(direction.forward * 100 + direction.up * 150);     // 擊退朝怪物前方與上方
+
+        hp = Mathf.Clamp(hp, 0, 99999);
+
+        if (hp == 0) Dead();                                            // 如果血量等於 0 就死亡
+    }
+
+    /// <summary>
+    /// 死亡
+    /// </summary>
+    private void Dead()
+    {
+        GetComponent<CapsuleCollider>().enabled = false;   // 關閉碰撞器
+        ani.SetBool("死亡開關", true);      // 死亡動畫
+        enabled = false;                    // 關閉此腳本
+
+        float r = Random.Range(0f, 1f);     // 隨機取得數值 0 ~ 1
+
+        if (r <= skullprop) Instantiate(skull, transform.position + Vector3.up * 1, transform.rotation);
     }
 }
