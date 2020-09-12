@@ -118,6 +118,8 @@ public class Enemy : MonoBehaviour
         GetComponent<CapsuleCollider>().enabled = false;   // 關閉碰撞器
         ani.SetBool("死亡開關", true);      // 死亡動畫
         enabled = false;                    // 關閉此腳本
+        nav.isStopped = true;
+        player.GetComponent<Player>().Exp(exp);
 
         float r = Random.Range(0f, 1f);     // 隨機取得數值 0 ~ 1
 

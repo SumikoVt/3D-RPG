@@ -29,7 +29,7 @@ public class MenuManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
-
+        StartCoroutine(Loading());
     }
 
     private IEnumerator Loading()
